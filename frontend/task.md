@@ -1,0 +1,22 @@
+# Frontend Build Tasks
+
+- [x] Read backend source (main.py, clerk.py, db.py)
+- [x] Create implementation plan
+- [x] Get user approval
+- [x] Install npm dependencies (tailwindcss, @clerk/clerk-react)
+- [x] Create .env.local
+- [x] Modify vite.config.js (add tailwindcss plugin + port 5173 lock)
+- [x] Modify src/index.css (tailwind directives + global styles)
+- [x] Modify src/main.jsx (ClerkProvider)
+- [x] Create src/lib/api.js (fetch SSE streaming)
+- [x] Create src/hooks/useChatStream.js
+- [x] Create src/components/Sidebar.jsx
+- [x] Create src/components/ChatWindow.jsx
+- [x] Create src/components/MessageList.jsx
+- [x] Create src/components/MessageBubble.jsx
+- [x] Create src/components/ChatInput.jsx
+- [x] Create src/components/SearchIndicator.jsx
+- [x] Modify src/App.jsx (auth routing)
+- [x] Fix apostrophe syntax error in MessageList.jsx
+- [x] Kill stale Vite process on port 5173
+- [x] npm run build — ✅ 80 modules, 0 errors

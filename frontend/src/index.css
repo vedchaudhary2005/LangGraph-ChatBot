@@ -1,0 +1,161 @@
+@import "tailwindcss";
+
+/* ============================================================
+   TAILWIND DARK MODE — class strategy
+   Apply "dark" class to <html> to activate dark variants.
+   ============================================================ */
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ============================================================
+   CSS CUSTOM PROPERTIES — theme tokens
+   ============================================================ */
+
+:root {
+  /* Dark mode defaults */
+  --bg-base:        #0f0f0f;
+  --bg-sidebar:     #111111;
+  --bg-elevated:    #1a1a1a;
+  --bg-input:       #1e1e1e;
+  --bg-hover:       rgba(255,255,255,0.05);
+  --border:         rgba(255,255,255,0.08);
+  --border-medium:  rgba(255,255,255,0.12);
+  --text-primary:   #ececec;
+  --text-secondary: #9ca3af;
+  --text-muted:     #6b7280;
+  --text-faint:     #4b5563;
+  --accent:         #7c3aed;
+  --accent-hover:   #6d28d9;
+  --scrollbar:      rgba(255,255,255,0.12);
+  --scrollbar-hover:rgba(255,255,255,0.22);
+  --user-bubble-bg: #7c3aed;
+  --user-bubble-text: #ffffff;
+  --assistant-bg:   #1e1e1e;
+  --assistant-border: rgba(255,255,255,0.08);
+}
+
+/* Light mode overrides on <html class="light"> */
+html.light {
+  --bg-base:        #f8f8f8;
+  --bg-sidebar:     #f1f0ef;
+  --bg-elevated:    #ffffff;
+  --bg-input:       #ffffff;
+  --bg-hover:       rgba(0,0,0,0.04);
+  --border:         rgba(0,0,0,0.08);
+  --border-medium:  rgba(0,0,0,0.12);
+  --text-primary:   #111111;
+  --text-secondary: #374151;
+  --text-muted:     #6b7280;
+  --text-faint:     #9ca3af;
+  --accent:         #7c3aed;
+  --accent-hover:   #6d28d9;
+  --scrollbar:      rgba(0,0,0,0.12);
+  --scrollbar-hover:rgba(0,0,0,0.22);
+  --user-bubble-bg: #7c3aed;
+  --user-bubble-text: #ffffff;
+  --assistant-bg:   #ffffff;
+  --assistant-border: rgba(0,0,0,0.08);
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    Oxygen, Ubuntu, Cantarell, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-hover);
+}
+
+/* ============================================================
+   STREAMING CURSOR
+   ============================================================ */
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+.streaming-cursor::after {
+  content: '▋';
+  display: inline-block;
+  margin-left: 1px;
+  animation: blink 0.8s step-start infinite;
+  color: var(--accent);
+}
+
+/* ============================================================
+   PROSE CHAT — wrapper for ReactMarkdown assistant output
+   ============================================================ */
+
+.prose-chat {
+  word-break: break-word;
+  line-height: 1.75;
+}
+
+/* streaming cursor attaches to the last inline element inside the wrapper */
+.streaming-cursor > *:last-child::after,
+.streaming-cursor::after {
+  content: '▋';
+  display: inline;
+  margin-left: 1px;
+  animation: blink 0.8s step-start infinite;
+  color: var(--accent);
+}
+
+/* Legacy class kept for any plain-text fallback elements */
+.message-content {
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.75;
+}
+
+.message-content code {
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  font-family: 'Fira Code', 'Courier New', monospace;
+  font-size: 0.85em;
+}
+
+/* ============================================================
+   THEME-AWARE UTILITY CLASSES
+   (Used instead of hardcoded Tailwind colors for themed elements)
+   ============================================================ */
+
+.bg-base        { background-color: var(--bg-base); }
+.bg-sidebar     { background-color: var(--bg-sidebar); }
+.bg-elevated    { background-color: var(--bg-elevated); }
+.bg-input-area  { background-color: var(--bg-input); }
+.border-theme   { border-color: var(--border); }
+.text-primary   { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-muted-th  { color: var(--text-muted); }
