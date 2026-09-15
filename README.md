@@ -149,7 +149,7 @@ Never commit your .env file or API keys to GitHub.
 
 1. Clone the repository
 
-git clone https://github.com/vedchaudhary2005/LangGraph-AI.git
+[git clone https://github.com/vedchaudhary2005/LangGraph-AI.git](https://github.com/vedchaudhary2005/LangGraph-ChatBot)
 cd LangGraph-AI
 
 2. Backend Setup
