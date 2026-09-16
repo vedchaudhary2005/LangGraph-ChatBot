@@ -49,7 +49,7 @@ export default function ChatInput({ onSend, isStreaming, onStop, onRegisterFocus
   const canSend = text.trim().length > 0 && !isStreaming;
 
   return (
-    <div className="px-4 pb-5 pt-2">
+    <div className="px-3 md:px-4 pt-2 pb-[calc(1rem+env(safe-area-inset-bottom,0px))]">
       <div className="max-w-3xl mx-auto">
         {/* Input container */}
         <div

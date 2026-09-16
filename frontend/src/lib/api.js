@@ -71,7 +71,8 @@ export async function streamChat(
 
     if (response.status === 401 || response.status === 403) {
       console.error('[api] auth error:', response.status, detail);
-      onError('Your session has expired. Please sign in again.');
+      const reasonMsg = detail ? `Authentication error: ${detail}. Please sign in again.` : 'Your session has expired. Please sign in again.';
+      onError(reasonMsg);
     } else if (response.status >= 500) {
       console.error('[api] server error:', response.status, detail);
       onError('The server encountered an error. Please try again.');
@@ -81,6 +82,7 @@ export async function streamChat(
     }
     return;
   }
+
 
   // Read the SSE stream incrementally using ReadableStream
   const reader = response.body.getReader();

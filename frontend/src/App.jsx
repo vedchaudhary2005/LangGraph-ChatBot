@@ -3,6 +3,8 @@ import {
   SignedIn,
   SignedOut,
   SignIn,
+  useUser,
+  useSession,
 } from '@clerk/clerk-react';
 
 import { ThemeProvider, useTheme } from './context/ThemeContext';
@@ -17,6 +19,10 @@ function AppContent() {
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === 'dark';
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showDebug, setShowDebug] = useState(false);
+
+  const { isLoaded, isSignedIn, user } = useUser();
+  const { session } = useSession();
 
   const {
     conversations,
@@ -35,13 +41,12 @@ function AppContent() {
     registerFocusInput,
   } = useChatStream();
 
-
   return (
     <>
       {/* ── Unauthenticated ──────────────────────────────────── */}
       <SignedOut>
         <div
-          className="min-h-screen flex flex-col items-center justify-center px-4"
+          className="min-h-screen min-h-[100dvh] flex flex-col items-center justify-center px-4"
           style={{ backgroundColor: 'var(--bg-base)' }}
         >
           {/* Branding */}
@@ -101,9 +106,10 @@ function AppContent() {
       {/* ── Authenticated ────────────────────────────────────── */}
       <SignedIn>
         <div
-          className="flex h-screen overflow-hidden"
+          className="flex h-screen h-[100dvh] overflow-hidden"
           style={{ backgroundColor: 'var(--bg-base)' }}
         >
+
           {/* Sidebar */}
           <Sidebar
             conversations={conversations}
@@ -197,11 +203,51 @@ function AppContent() {
               />
             </div>
           </div>
+
+          {/* ── Developer Auth Debug Panel (Dev / Mobile Testing Only) ───── */}
+          <button
+            onClick={() => setShowDebug((prev) => !prev)}
+            className="fixed bottom-3 left-3 z-40 px-2.5 py-1 rounded-lg text-[11px] font-mono
+                       border shadow-md transition-opacity opacity-70 hover:opacity-100"
+            style={{
+              backgroundColor: 'var(--bg-elevated)',
+              borderColor: 'var(--border)',
+              color: 'var(--text-muted)',
+            }}
+          >
+            🐛 Debug Auth
+          </button>
+
+          {showDebug && (
+            <div
+              className="fixed bottom-12 left-3 z-50 w-72 max-w-[calc(100vw-24px)] rounded-xl p-3 text-xs font-mono
+                         border shadow-2xl space-y-1.5"
+              style={{
+                backgroundColor: 'var(--bg-elevated)',
+                borderColor: 'var(--border)',
+                color: 'var(--text-primary)',
+              }}
+            >
+              <div className="flex items-center justify-between pb-1 border-b" style={{ borderColor: 'var(--border)' }}>
+                <span className="font-bold text-[11px] uppercase tracking-wider text-violet-400">Auth Diagnostics</span>
+                <button onClick={() => setShowDebug(false)} className="text-muted-th hover:opacity-75">✕</button>
+              </div>
+              <div className="space-y-1 text-[11px]">
+                <div className="flex justify-between"><span>Clerk loaded:</span><span className={isLoaded ? 'text-green-400' : 'text-red-400'}>{isLoaded ? 'YES' : 'NO'}</span></div>
+                <div className="flex justify-between"><span>Signed in:</span><span className={isSignedIn ? 'text-green-400' : 'text-red-400'}>{isSignedIn ? 'YES' : 'NO'}</span></div>
+                <div className="flex justify-between"><span>User ID exists:</span><span className={user?.id ? 'text-green-400' : 'text-red-400'}>{user?.id ? 'YES' : 'NO'}</span></div>
+                <div className="flex justify-between"><span>Session active:</span><span className={session ? 'text-green-400' : 'text-red-400'}>{session ? 'YES' : 'NO'}</span></div>
+                <div className="flex justify-between truncate gap-1"><span>API URL:</span><span className="text-violet-300 truncate max-w-[140px]">{import.meta.env.VITE_API_URL || 'http://localhost:8000'}</span></div>
+                {error && <div className="text-red-400 break-words mt-1 border-t pt-1" style={{ borderColor: 'var(--border)' }}>Detail: {error}</div>}
+              </div>
+            </div>
+          )}
         </div>
       </SignedIn>
     </>
   );
 }
+
 
 /**
  * App — root component, wraps everything in ThemeProvider.
