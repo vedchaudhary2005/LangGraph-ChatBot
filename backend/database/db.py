@@ -140,3 +140,26 @@ async def get_all_user_chats(
         )
 
     return list(reversed(result))
+
+
+# DELETE CHAT
+
+
+async def delete_chat(
+    thread_id: str,
+    user_id: str,
+) -> bool:
+    """
+    Delete a specific chat document belonging to both thread_id AND user_id.
+
+    Returns True if a document was deleted, False otherwise.
+    """
+    result = await chat_collection.delete_one(
+        {
+            "thread_id": thread_id,
+            "user_id": user_id,
+        }
+    )
+
+    return result.deleted_count > 0
+

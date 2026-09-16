@@ -7,7 +7,7 @@
  * so we use fetch() + ReadableStream to consume the SSE stream manually.
  */
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/+$/, '');
 
 /**
  * Stream a chat message from the backend.
@@ -212,4 +212,37 @@ export async function fetchUserChats(token) {
     return [];
   }
 }
+
+/**
+ * Delete a saved conversation for the authenticated user.
+ *
+ * @param {string} threadId - The thread ID to delete
+ * @param {string} token    - Clerk session token
+ * @returns {Promise<boolean>} True if successfully deleted
+ */
+export async function deleteUserChat(threadId, token) {
+  const url = `${API_URL}/chats/${encodeURIComponent(threadId)}`;
+
+  try {
+    const response = await fetch(url, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      console.warn('[api] deleteUserChat HTTP error:', response.status);
+      return false;
+    }
+
+    const data = await response.json();
+    return data?.success === true;
+  } catch (err) {
+    console.warn('[api] deleteUserChat failed:', err);
+    return false;
+  }
+}
+
 

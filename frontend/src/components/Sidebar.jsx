@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { UserButton } from '@clerk/clerk-react';
 import { useTheme } from '../context/ThemeContext';
 
@@ -9,6 +10,7 @@ import { useTheme } from '../context/ThemeContext';
  *   activeConversationId:   string | null
  *   onNewChat:              () => void
  *   onSelectConversation:   (id: string) => void
+ *   onDeleteChat:           (id: string) => Promise<boolean>
  *   isOpen:                 bool  (mobile drawer)
  *   onClose:                () => void
  */
@@ -17,11 +19,15 @@ export default function Sidebar({
   activeConversationId,
   onNewChat,
   onSelectConversation,
+  onDeleteChat,
   isOpen,
   onClose,
 }) {
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === 'dark';
+  const [confirmingDeleteId, setConfirmingDeleteId] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
 
   return (
     <>
@@ -192,50 +198,75 @@ export default function Sidebar({
               {conversations.map((conv) => {
                 const isActive = conv.id === activeConversationId;
                 return (
-                  <button
+                  <div
                     key={conv.id}
-                    onClick={() => {
-                      onSelectConversation(conv.id);
-                      onClose();
-                    }}
-                    title={conv.title}
-                    className="w-full text-left flex items-center gap-2 px-3 py-2
-                               rounded-lg text-sm truncate transition-colors duration-100"
+                    className="group relative flex items-center rounded-lg transition-colors duration-100"
                     style={{
                       backgroundColor: isActive ? 'var(--bg-hover)' : 'transparent',
-                      color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
-                      fontWeight: isActive ? 500 : 400,
                     }}
                     onMouseEnter={(e) => {
                       if (!isActive) {
                         e.currentTarget.style.backgroundColor = 'var(--bg-hover)';
-                        e.currentTarget.style.color = 'var(--text-primary)';
                       }
                     }}
                     onMouseLeave={(e) => {
                       if (!isActive) {
                         e.currentTarget.style.backgroundColor = 'transparent';
-                        e.currentTarget.style.color = 'var(--text-secondary)';
                       }
                     }}
                   >
-                    <svg
-                      className="w-3.5 h-3.5 flex-shrink-0"
-                      style={{ color: 'var(--text-faint)' }}
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
+                    <button
+                      onClick={() => {
+                        onSelectConversation(conv.id);
+                        onClose();
+                      }}
+                      title={conv.title}
+                      className="flex-1 min-w-0 text-left flex items-center gap-2 px-3 py-2
+                                 text-sm truncate transition-colors duration-100"
+                      style={{
+                        color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
+                        fontWeight: isActive ? 500 : 400,
+                      }}
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6
-                           a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-3 3-3-3z"
-                      />
-                    </svg>
-                    <span className="truncate">{conv.title}</span>
-                  </button>
+                      <svg
+                        className="w-3.5 h-3.5 flex-shrink-0"
+                        style={{ color: 'var(--text-faint)' }}
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6
+                             a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-3 3-3-3z"
+                        />
+                      </svg>
+                      <span className="truncate">{conv.title}</span>
+                    </button>
+
+                    {/* Delete chat button (Trash icon) */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setConfirmingDeleteId(conv.id);
+                      }}
+                      title="Delete chat"
+                      className="opacity-100 md:opacity-0 group-hover:opacity-100 p-1.5 mr-1.5 rounded-md
+                                 transition-opacity hover:text-red-400 focus:opacity-100"
+                      style={{ color: 'var(--text-faint)' }}
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                        />
+                      </svg>
+                    </button>
+                  </div>
                 );
               })}
             </div>
@@ -259,6 +290,80 @@ export default function Sidebar({
           </div>
         </div>
       </aside>
+
+      {/* ── Confirmation Modal for Chat Deletion ────────────────────────────── */}
+      {confirmingDeleteId && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
+          onClick={() => !isDeleting && setConfirmingDeleteId(null)}
+        >
+          <div
+            className="w-full max-w-sm rounded-2xl p-5 border shadow-2xl space-y-4"
+            style={{
+              backgroundColor: 'var(--bg-elevated)',
+              borderColor: 'var(--border)',
+              color: 'var(--text-primary)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start gap-3">
+              <div
+                className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
+                style={{ backgroundColor: 'rgba(239, 68, 68, 0.15)', color: '#f87171' }}
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+                  Delete this chat?
+                </h3>
+                <p className="text-xs mt-1 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                  This action cannot be undone.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setConfirmingDeleteId(null)}
+                disabled={isDeleting}
+                className="px-3.5 py-1.5 rounded-xl text-xs font-medium border transition-colors"
+                style={{
+                  borderColor: 'var(--border)',
+                  color: 'var(--text-secondary)',
+                  backgroundColor: 'transparent',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  setIsDeleting(true);
+                  if (onDeleteChat) {
+                    await onDeleteChat(confirmingDeleteId);
+                  }
+                  setIsDeleting(false);
+                  setConfirmingDeleteId(null);
+                }}
+                disabled={isDeleting}
+                className="px-3.5 py-1.5 rounded-xl text-xs font-medium bg-red-600 hover:bg-red-700 text-white transition-colors"
+              >
+                {isDeleting ? 'Deleting…' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
+

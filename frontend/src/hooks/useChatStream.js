@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useSession } from '@clerk/clerk-react';
-import { streamChat, fetchChatHistory, fetchUserChats } from '../lib/api';
+import { streamChat, fetchChatHistory, fetchUserChats, deleteUserChat } from '../lib/api';
+
 
 // localStorage key — stores the active conversation's checkpoint_id only.
 // The full chat content comes from MongoDB (via the backend).
@@ -385,6 +386,48 @@ export function useChatStream() {
     );
   }, []);
 
+  // ----------------------------------------------------------------
+  // Delete Chat
+  // ----------------------------------------------------------------
+  const deleteChat = useCallback(
+    async (id) => {
+      let token;
+      try {
+        token = await session?.getToken();
+      } catch (err) {
+        console.error('[useChatStream] deleteChat failed to get token:', err);
+        setError('Your session has expired. Please sign in again.');
+        return false;
+      }
+
+      if (!token) return false;
+
+      const conv = conversations.find((c) => c.id === id);
+      const threadId = conv?.checkpointId || id;
+
+      const success = await deleteUserChat(threadId, token);
+      if (success) {
+        const savedCheckpointId = lsGet();
+        if (savedCheckpointId === threadId || activeConversationId === id || activeConversationId === conv?.id) {
+          lsClear();
+          setActiveConversationId(null);
+          setIsStreaming(false);
+          setError(null);
+          setSearchState(null);
+        }
+
+        setConversations((prev) =>
+          prev.filter((c) => c.id !== id && c.checkpointId !== threadId)
+        );
+        return true;
+      } else {
+        setError('Failed to delete chat. Please try again.');
+        return false;
+      }
+    },
+    [session, conversations, activeConversationId]
+  );
+
   return {
     conversations,
     activeConversationId,
@@ -397,8 +440,10 @@ export function useChatStream() {
     sendMessage,
     newChat,
     selectConversation,
+    deleteChat,
     stopStreaming,
     setError,
     registerFocusInput,
   };
 }
+

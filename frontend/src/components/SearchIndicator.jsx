@@ -57,14 +57,14 @@ export default function SearchIndicator({ searchState }) {
 
       {/* Text + URLs */}
       <div className="flex-1 min-w-0">
-        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+        <p className="text-xs break-words" style={{ color: 'var(--text-muted)' }}>
           {isSearching ? (
             <>
               🔎{' '}Searching the web
               {query && (
                 <>
                   {' '}for{' '}
-                  <span style={{ color: '#a78bfa' }} className="font-medium">
+                  <span style={{ color: '#a78bfa' }} className="font-medium break-all">
                     "{query}"
                   </span>
                 </>
@@ -77,7 +77,7 @@ export default function SearchIndicator({ searchState }) {
               {query && (
                 <>
                   {' '}for{' '}
-                  <span style={{ color: '#34d399' }} className="font-medium">
+                  <span style={{ color: '#34d399' }} className="font-medium break-all">
                     "{query}"
                   </span>
                 </>
@@ -104,7 +104,8 @@ export default function SearchIndicator({ searchState }) {
                   title={url}
                   className="inline-flex items-center gap-1 text-xs px-2 py-0.5
                              rounded-full border transition-colors duration-150
-                             truncate max-w-[160px]"
+                             truncate max-w-[140px] sm:max-w-[200px]"
+
                   style={{
                     backgroundColor: 'var(--bg-hover)',
                     borderColor: 'var(--border)',

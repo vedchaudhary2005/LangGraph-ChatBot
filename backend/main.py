@@ -1,30 +1,19 @@
 import os
 import json
-
 from uuid import uuid4
 from typing import TypedDict, Annotated, Optional
-
 from dotenv import load_dotenv
 
 load_dotenv()
 
-
-
-
-from fastapi import FastAPI, Query, Depends
+from fastapi import FastAPI, Query, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
-
-
-
-
 from langgraph.graph import StateGraph, END, add_messages
 
 
 
 # LANGCHAIN MESSAGES
-
-
 from langchain_core.messages import (
     HumanMessage,
     AIMessage,
@@ -33,10 +22,10 @@ from langchain_core.messages import (
 )
 
 
-# GEMINI
+# G
 
 
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_groq import ChatGroq
 
 
 
@@ -57,7 +46,9 @@ from database.db import (
     save_message,
     get_chat_history,
     get_all_user_chats,
+    delete_chat,
 )
+
 
 
 
@@ -87,9 +78,9 @@ tools = [
 
 # GEMINI MODEL
 
-llm = ChatGoogleGenerativeAI(
-    model="gemini-3.6-flash",
-    google_api_key=os.getenv("GEMINI_API_KEY"),
+llm = ChatGroq(
+    model="openai/gpt-oss-120b",
+    api_key=os.getenv("GROQ_API_KEY"),
     temperature=0,
 )
 
@@ -219,19 +210,25 @@ app = FastAPI()
 # CORS
 
 
+frontend_url_env = os.getenv(
+    "FRONTEND_URL",
+    "http://localhost:5173",
+)
+
+allowed_origins = [
+    origin.strip()
+    for origin in frontend_url_env.split(",")
+    if origin.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-
-    allow_origins=[
-        "http://localhost:5173"
-    ],
-
+    allow_origins=allowed_origins,
     allow_credentials=True,
-
     allow_methods=["*"],
-
     allow_headers=["*"],
 )
+
 
 
 
@@ -604,6 +601,38 @@ async def chat_history(
         "checkpoint_id": checkpoint_id,
         "messages": messages,
     }
+
+
+# ==
+# DELETE CHAT ENDPOINT
+# ==
+
+@app.delete("/chats/{thread_id}")
+async def delete_user_chat(
+    thread_id: str,
+    user_id: str = Depends(
+        require_auth
+    ),
+):
+    """
+    Delete a specific conversation belonging to the authenticated Clerk user.
+
+    Security: user_id comes strictly from Clerk authentication, never from client body.
+    Filters MongoDB delete by BOTH thread_id AND user_id.
+    """
+    deleted = await delete_chat(
+        thread_id,
+        user_id,
+    )
+
+    if not deleted:
+        raise HTTPException(
+            status_code=404,
+            detail="Chat thread not found or unauthorized",
+        )
+
+    return {"success": True}
+
 
 
 # ==
