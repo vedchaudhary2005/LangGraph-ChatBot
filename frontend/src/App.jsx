@@ -106,7 +106,7 @@ function AppContent() {
       {/* ── Authenticated ────────────────────────────────────── */}
       <SignedIn>
         <div
-          className="flex h-screen h-[100dvh] overflow-hidden"
+          className="flex w-full h-screen h-[100dvh] overflow-hidden"
           style={{ backgroundColor: 'var(--bg-base)' }}
         >
 
@@ -121,22 +121,22 @@ function AppContent() {
             onClose={() => setSidebarOpen(false)}
           />
 
-
           {/* Main area */}
-          <div className="flex flex-col flex-1 min-w-0 h-full">
+          <div className="flex flex-col flex-1 min-w-0 w-full h-full overflow-hidden">
 
             {/* Mobile top bar */}
             <div
               className="flex md:hidden items-center justify-between
-                         px-4 py-3 border-b flex-shrink-0"
+                         px-4 py-3 border-b flex-shrink-0 w-full"
               style={{ borderColor: 'var(--border)' }}
             >
               <div className="flex items-center gap-3">
                 {/* Hamburger */}
                 <button
                   onClick={() => setSidebarOpen(true)}
-                  className="transition-colors duration-150"
+                  className="transition-colors duration-150 p-1 -ml-1 rounded-lg"
                   style={{ color: 'var(--text-muted)' }}
+                  aria-label="Open sidebar"
                 >
                   <svg
                     className="w-5 h-5"
@@ -189,7 +189,7 @@ function AppContent() {
             </div>
 
             {/* Chat window — fills remaining space */}
-            <div className="flex-1 overflow-hidden">
+            <div className="flex-1 min-h-0 w-full overflow-hidden">
               <ChatWindow
                 messages={messages}
                 searchState={searchState}
@@ -204,46 +204,51 @@ function AppContent() {
             </div>
           </div>
 
-          {/* ── Developer Auth Debug Panel (Dev / Mobile Testing Only) ───── */}
-          <button
-            onClick={() => setShowDebug((prev) => !prev)}
-            className="fixed bottom-3 left-3 z-40 px-2.5 py-1 rounded-lg text-[11px] font-mono
-                       border shadow-md transition-opacity opacity-70 hover:opacity-100"
-            style={{
-              backgroundColor: 'var(--bg-elevated)',
-              borderColor: 'var(--border)',
-              color: 'var(--text-muted)',
-            }}
-          >
-            🐛 Debug Auth
-          </button>
+          {/* ── Developer Auth Debug Panel (Dev / Local Testing Only) ───── */}
+          {import.meta.env.DEV && (
+            <>
+              <button
+                onClick={() => setShowDebug((prev) => !prev)}
+                className="fixed bottom-3 left-3 z-40 px-2.5 py-1 rounded-lg text-[11px] font-mono
+                           border shadow-md transition-opacity opacity-70 hover:opacity-100"
+                style={{
+                  backgroundColor: 'var(--bg-elevated)',
+                  borderColor: 'var(--border)',
+                  color: 'var(--text-muted)',
+                }}
+              >
+                🐛 Debug Auth
+              </button>
 
-          {showDebug && (
-            <div
-              className="fixed bottom-12 left-3 z-50 w-72 max-w-[calc(100vw-24px)] rounded-xl p-3 text-xs font-mono
-                         border shadow-2xl space-y-1.5"
-              style={{
-                backgroundColor: 'var(--bg-elevated)',
-                borderColor: 'var(--border)',
-                color: 'var(--text-primary)',
-              }}
-            >
-              <div className="flex items-center justify-between pb-1 border-b" style={{ borderColor: 'var(--border)' }}>
-                <span className="font-bold text-[11px] uppercase tracking-wider text-violet-400">Auth Diagnostics</span>
-                <button onClick={() => setShowDebug(false)} className="text-muted-th hover:opacity-75">✕</button>
-              </div>
-              <div className="space-y-1 text-[11px]">
-                <div className="flex justify-between"><span>Clerk loaded:</span><span className={isLoaded ? 'text-green-400' : 'text-red-400'}>{isLoaded ? 'YES' : 'NO'}</span></div>
-                <div className="flex justify-between"><span>Signed in:</span><span className={isSignedIn ? 'text-green-400' : 'text-red-400'}>{isSignedIn ? 'YES' : 'NO'}</span></div>
-                <div className="flex justify-between"><span>User ID exists:</span><span className={user?.id ? 'text-green-400' : 'text-red-400'}>{user?.id ? 'YES' : 'NO'}</span></div>
-                <div className="flex justify-between"><span>Session active:</span><span className={session ? 'text-green-400' : 'text-red-400'}>{session ? 'YES' : 'NO'}</span></div>
-                <div className="flex justify-between truncate gap-1"><span>API URL:</span><span className="text-violet-300 truncate max-w-[140px]">{import.meta.env.VITE_API_URL || 'http://localhost:8000'}</span></div>
-                {error && <div className="text-red-400 break-words mt-1 border-t pt-1" style={{ borderColor: 'var(--border)' }}>Detail: {error}</div>}
-              </div>
-            </div>
+              {showDebug && (
+                <div
+                  className="fixed bottom-12 left-3 z-50 w-72 max-w-[calc(100vw-24px)] rounded-xl p-3 text-xs font-mono
+                             border shadow-2xl space-y-1.5"
+                  style={{
+                    backgroundColor: 'var(--bg-elevated)',
+                    borderColor: 'var(--border)',
+                    color: 'var(--text-primary)',
+                  }}
+                >
+                  <div className="flex items-center justify-between pb-1 border-b" style={{ borderColor: 'var(--border)' }}>
+                    <span className="font-bold text-[11px] uppercase tracking-wider text-violet-400">Auth Diagnostics</span>
+                    <button onClick={() => setShowDebug(false)} className="text-muted-th hover:opacity-75">✕</button>
+                  </div>
+                  <div className="space-y-1 text-[11px]">
+                    <div className="flex justify-between"><span>Clerk loaded:</span><span className={isLoaded ? 'text-green-400' : 'text-red-400'}>{isLoaded ? 'YES' : 'NO'}</span></div>
+                    <div className="flex justify-between"><span>Signed in:</span><span className={isSignedIn ? 'text-green-400' : 'text-red-400'}>{isSignedIn ? 'YES' : 'NO'}</span></div>
+                    <div className="flex justify-between"><span>User ID exists:</span><span className={user?.id ? 'text-green-400' : 'text-red-400'}>{user?.id ? 'YES' : 'NO'}</span></div>
+                    <div className="flex justify-between"><span>Session active:</span><span className={session ? 'text-green-400' : 'text-red-400'}>{session ? 'YES' : 'NO'}</span></div>
+                    <div className="flex justify-between truncate gap-1"><span>API URL:</span><span className="text-violet-300 truncate max-w-[140px]">{import.meta.env.VITE_API_URL || 'http://localhost:8000'}</span></div>
+                    {error && <div className="text-red-400 break-words mt-1 border-t pt-1" style={{ borderColor: 'var(--border)' }}>Detail: {error}</div>}
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       </SignedIn>
+
     </>
   );
 }

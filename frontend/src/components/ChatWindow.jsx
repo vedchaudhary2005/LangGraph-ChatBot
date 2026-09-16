@@ -27,12 +27,12 @@ export default function ChatWindow({
   onRegisterFocus,
 }) {
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div className="flex flex-col h-full w-full overflow-hidden">
       {/* ── Error banner ──────────────────────────────────────── */}
       {error && (
         <div
           className="flex-shrink-0 flex items-center justify-between px-5 py-3
-                     border-b text-sm"
+                     border-b text-sm w-full"
           style={{
             backgroundColor: 'rgba(239,68,68,0.08)',
             borderColor: 'rgba(239,68,68,0.2)',
@@ -79,7 +79,7 @@ export default function ChatWindow({
       )}
 
       {/* ── Message list ──────────────────────────────────────── */}
-      <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+      <div className="flex-1 overflow-hidden flex flex-col min-h-0 w-full">
         <MessageList
           messages={messages}
           searchState={searchState}
@@ -91,7 +91,7 @@ export default function ChatWindow({
       {/* ── Generating indicator ──────────────────────────────── */}
       {isStreaming && (
         <div
-          className="flex-shrink-0 flex items-center gap-2 px-6 py-2 text-xs"
+          className="flex-shrink-0 flex items-center gap-2 px-6 py-2 text-xs w-full"
           style={{ color: '#a78bfa' }}
         >
           <span className="w-1.5 h-1.5 bg-violet-400 rounded-full animate-pulse" />
@@ -101,9 +101,10 @@ export default function ChatWindow({
 
       {/* ── Input ────────────────────────────────────────────── */}
       <div
-        className="flex-shrink-0 border-t"
+        className="flex-shrink-0 border-t w-full"
         style={{ borderColor: 'var(--border)' }}
       >
+
         <ChatInput
           onSend={onSend}
           isStreaming={isStreaming}

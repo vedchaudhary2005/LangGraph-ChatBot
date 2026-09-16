@@ -66,12 +66,19 @@ html.light {
 }
 
 html, body, #root {
+  width: 100%;
   height: 100%;
-  height: 100dvh;
   margin: 0;
   padding: 0;
   overflow: hidden;
 }
+
+@supports (height: 100dvh) {
+  html, body, #root {
+    height: 100dvh;
+  }
+}
+
 
 
 body {
